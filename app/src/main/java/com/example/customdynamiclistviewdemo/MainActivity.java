@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.customdynamiclistviewdemo.model.Product;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         mListView = (ListView) findViewById(R.id.list_view);
         final MyAdapter adapter = new MyAdapter(this, R.layout.list_item, mProductList);
         mListView.setAdapter(adapter);
-        //mListView.setItemsCanFocus(true);
 
         Button saveButton = (Button) findViewById(R.id.save_button);
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < adapter.getCount(); i++) {
                     Product product = (Product) adapter.getItem(i);
                     String msg = String.format(
+                            Locale.US,
                             "Product Name: %s, Stock Available: %d, Quantity: %d, Pallet Number: %d",
                             product.productName,
                             product.stockAvailable,
