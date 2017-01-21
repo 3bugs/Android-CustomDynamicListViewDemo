@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.customdynamiclistviewdemo.adapter.SpinnerWithHintArrayAdapter;
 import com.example.customdynamiclistviewdemo.model.Product;
 
 import java.util.ArrayList;
@@ -24,7 +27,13 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private ListView mListView;
+    private MyAdapter mAdapter;
+    private View mAddLayout;
+    private Button mAddButton;
+    private Spinner mProductSpinner;
     private ArrayList<Product> mProductList = new ArrayList<>();
 
     @Override
@@ -38,15 +47,15 @@ public class MainActivity extends AppCompatActivity {
         mProductList.add(product);
 
         mListView = (ListView) findViewById(R.id.list_view);
-        final MyAdapter adapter = new MyAdapter(this, R.layout.list_item, mProductList);
-        mListView.setAdapter(adapter);
+        mAdapter = new MyAdapter(this, R.layout.list_item, mProductList);
+        mListView.setAdapter(mAdapter);
 
         Button saveButton = (Button) findViewById(R.id.save_button);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < adapter.getCount(); i++) {
-                    Product product = (Product) adapter.getItem(i);
+                for (int i = 0; i < mAdapter.getCount(); i++) {
+                    Product product = (Product) mAdapter.getItem(i);
                     String msg = String.format(
                             Locale.US,
                             "Product Name: %s, Stock Available: %d, Quantity: %d, Pallet Number: %d",
@@ -59,6 +68,63 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        mAddLayout = findViewById(R.id.add_layout);
+        mAddButton = (Button) findViewById(R.id.add_button);
+        mAddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAddLayout();
+            }
+        });
+
+        setupAddLayout();
+        hideAddLayout();
+    }
+
+    private void setupAddLayout() {
+        setupSpinner();
+        Button saveItemButton = (Button) findViewById(R.id.save_item_button);
+        saveItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Product product = new Product(
+                        mProductSpinner.getSelectedItem().toString(),
+                        0
+                );
+
+                EditText quantityEditText = (EditText) findViewById(R.id.quantity_edit_text2);
+                product.quantity = Integer.valueOf(quantityEditText.getText().toString());
+                Log.i(TAG, "quantity: " + product.quantity);
+
+                mProductList.add(product);
+                mAdapter.notifyDataSetChanged();
+
+                hideAddLayout();
+            }
+        });
+    }
+
+    private void setupSpinner() {
+        mProductSpinner = (Spinner) findViewById(R.id.product_spinner);
+        final String[] productList = {"Product1", "Product2", "Product3", "Product4", "เลือก Product"};
+        SpinnerWithHintArrayAdapter adapter = new SpinnerWithHintArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                productList
+        );
+        mProductSpinner.setAdapter(adapter);
+        mProductSpinner.setSelection(adapter.getCount());
+    }
+
+    private void showAddLayout() {
+        mAddLayout.setVisibility(View.VISIBLE);
+        mAddButton.setVisibility(View.GONE);
+    }
+
+    private void hideAddLayout() {
+        mAddLayout.setVisibility(View.GONE);
+        mAddButton.setVisibility(View.VISIBLE);
     }
 
     private static class MyAdapter extends ArrayAdapter {
